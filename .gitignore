@@ -1,2 +1,5 @@
 #Ignore the .vs folder
 .vs/
+#Ignore bin and obj
+ListGenerator2000/bin/
+ListGenerator2000/obj/
