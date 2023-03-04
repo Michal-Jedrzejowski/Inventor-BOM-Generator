@@ -16,5 +16,21 @@ namespace ListGenerator2000.Models
         public string Vendor { get; set; }
         public string Comments { get; set; }
         public string State { get; set; }
+
+        public bool Equals(InventorPart part)
+        {
+            if (part.PartNumber == this.PartNumber)
+            {
+                this.Quantity++;
+                return true;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return PartNumber.GetHashCode();
+        }
     }
+
 }

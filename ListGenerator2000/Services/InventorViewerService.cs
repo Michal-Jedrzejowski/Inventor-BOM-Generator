@@ -9,6 +9,7 @@ namespace ListGenerator2000.Services
 {
     public class InventorViewerService
     {
+        private List<InventorPart> _inventorParts = new List<InventorPart>();
         public List<InventorPart> GetInventorParts(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
@@ -17,13 +18,14 @@ namespace ListGenerator2000.Services
             Inventor.ApprenticeServerComponent objapprenticeServerApp = new Inventor.ApprenticeServerComponentClass();
             Inventor.ApprenticeServerDocument invDocObj = objapprenticeServerApp.Open(fileName);
 
-            var inventorParts = GenerateBom(invDocObj.ComponentDefinition);
+            GenerateBom(invDocObj.ComponentDefinition);
+            var inventorParts = _inventorParts;
+
             return inventorParts;
         }
 
-        private List<InventorPart> GenerateBom(Inventor.ComponentDefinition invComp)
+        private void GenerateBom(Inventor.ComponentDefinition invComp)
         {
-
             var inventorParts = new List<InventorPart>();
             if (invComp.Type == Inventor.ObjectTypeEnum.kAssemblyComponentDefinitionObject)
             {
@@ -31,21 +33,43 @@ namespace ListGenerator2000.Services
                 {
                     foreach (Inventor.ComponentOccurrence occ in invComp.Occurrences)
                     {
-                        var parts = GenerateBom(occ.Definition);
-                        inventorParts.AddRange(parts);
+                        GenerateBom(occ.Definition);
                     }
                 }
                 else if (invComp.BOMStructure == Inventor.BOMStructureEnum.kPurchasedBOMStructure)
                 {
-                    inventorParts.Add(GenerateBOMRow(invComp));
+                    InventorPart part = GenerateBOMRow(invComp);
+                    bool equal = false;
+
+                    foreach (InventorPart listedpart in _inventorParts)
+                    {
+                        if (listedpart.Equals(part))
+                        {
+                            equal = true;
+                            break;
+                        }
+                    }
+
+                    if (!equal) _inventorParts.Add(part);
+
                 }
             }
             else if (invComp.Type == Inventor.ObjectTypeEnum.kPartComponentDefinitionObject)
             {
-                inventorParts.Add(GenerateBOMRow(invComp));
+                InventorPart part = GenerateBOMRow(invComp);
+                bool equal = false;
+
+                foreach (InventorPart listedpart in _inventorParts)
+                {
+                    if (listedpart.Equals(part))
+                    {
+                        equal = true;
+                        break;
+                    }
+                }
+                if (!equal) _inventorParts.Add(part);
             }
 
-            return inventorParts;
         }
 
         private InventorPart GenerateBOMRow(Inventor.ComponentDefinition invCompDef)
