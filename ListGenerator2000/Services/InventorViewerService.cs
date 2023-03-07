@@ -3,37 +3,65 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ListGenerator2000.Services
 {
     public class InventorViewerService
     {
+        private bool _stopRecursion;
         private List<InventorPart> _inventorParts = new List<InventorPart>();
         public List<InventorPart> GetInventorParts(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
                 throw new Exception("File not specify.");
-
             Inventor.ApprenticeServerComponent objapprenticeServerApp = new Inventor.ApprenticeServerComponentClass();
             Inventor.ApprenticeServerDocument invDocObj = objapprenticeServerApp.Open(fileName);
 
+            _stopRecursion = false;
             GenerateBom(invDocObj.ComponentDefinition);
             var inventorParts = _inventorParts;
 
             return inventorParts;
         }
 
+        
         private void GenerateBom(Inventor.ComponentDefinition invComp)
         {
-            var inventorParts = new List<InventorPart>();
-            if (invComp.Type == Inventor.ObjectTypeEnum.kAssemblyComponentDefinitionObject)
+
+            if (invComp.Type == Inventor.ObjectTypeEnum.kAssemblyComponentDefinitionObject && !_stopRecursion)
             {
                 if (invComp.BOMStructure == Inventor.BOMStructureEnum.kNormalBOMStructure)
                 {
                     foreach (Inventor.ComponentOccurrence occ in invComp.Occurrences)
                     {
-                        GenerateBom(occ.Definition);
+                        if (_stopRecursion) return;
+                        try
+                        {
+                            GenerateBom(occ.Definition);
+                        }
+                        catch (COMException e)
+                        {
+                            if ((uint)e.ErrorCode == 0x80004005)
+                            {
+                                DialogResult result;
+
+                                result = MessageBox.Show("Unresolved document detected. Do you want to continue?",
+                                    "Error jak chuj",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxIcon.Error);
+
+                                if (result == DialogResult.No)
+                                {
+                                    _stopRecursion = true;
+                                    _inventorParts = new List<InventorPart>();
+                                    return;
+                                }
+                            }
+                        }
+                        
                     }
                 }
                 else if (invComp.BOMStructure == Inventor.BOMStructureEnum.kPurchasedBOMStructure)
@@ -51,7 +79,6 @@ namespace ListGenerator2000.Services
                     }
 
                     if (!equal) _inventorParts.Add(part);
-
                 }
             }
             else if (invComp.Type == Inventor.ObjectTypeEnum.kPartComponentDefinitionObject)
