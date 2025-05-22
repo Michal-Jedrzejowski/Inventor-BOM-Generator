@@ -22,5 +22,17 @@ namespace ListGenerator2000.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("@\"C:\\Users\\MJ\\Desktop\\Listy\"")]
+        public string ListFileLocation {
+            get {
+                return ((string)(this["ListFileLocation"]));
+            }
+            set {
+                this["ListFileLocation"] = value;
+            }
+        }
     }
 }

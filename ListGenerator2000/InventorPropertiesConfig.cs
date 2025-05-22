@@ -5,37 +5,37 @@ using System.Text;
 
 namespace ListGenerator2000
 {
-    public class InventorPropertiesConfig
+    public class IPropertyConfigurator
     {
-        private Dictionary<string, Tuple<int, string>> iPropConfig = new Dictionary<string, Tuple<int, string>>();
-
-        public InventorPropertiesConfig()
+        public IPropertyConfigurator(string name, int propid, string propertySetName)
         {
-            SetIPropConfig();
+            Name = name;
+            Propid = propid;
+            PropertySetName = propertySetName;
         }
+        public string Name { get; }
+        public int Propid { get; }
+        public string PropertySetName { get; }
 
-        private void SetIPropConfig()
-        {   
-            iPropConfig.Add("Part Number", Tuple.Create(5, "Design Tracking Properties"));
-            iPropConfig.Add("Description", Tuple.Create(29, "Design Tracking Properties"));
-            iPropConfig.Add("Material", Tuple.Create(20, "Design Tracking Properties"));
-            iPropConfig.Add("Stock Number", Tuple.Create(55, "Design Tracking Properties"));
-            iPropConfig.Add("Vendor", Tuple.Create(30, "Design Tracking Properties"));
-            iPropConfig.Add("Comments", Tuple.Create(6, "Inventor Summary Information"));
-        }       
+        public static IPropertyConfigurator PartName = new IPropertyConfigurator("Part Number", 5, "Design Tracking Properties");
+        public static IPropertyConfigurator Description = new IPropertyConfigurator("Description", 29, "Design Tracking Properties");
+        public static IPropertyConfigurator Material = new IPropertyConfigurator("Material", 20, "Design Tracking Properties");
+        public static IPropertyConfigurator StockNumber = new IPropertyConfigurator("Stock Number", 55, "Design Tracking Properties");
+        public static IPropertyConfigurator Vendor = new IPropertyConfigurator("Vendor", 30, "Design Tracking Properties");
+        public static IPropertyConfigurator Comments = new IPropertyConfigurator("Comments", 6, "Inventor Summary Information");
+        public static IPropertyConfigurator Version = new IPropertyConfigurator("Version", 9, "Inventor Summary Information");
 
-        public List<Tuple<int, string>> GetIPropConfig(string[] keyArray)
+        public static List<IPropertyConfigurator> IPropertiesConfigurationList = new List<IPropertyConfigurator>()
         {
-            List<Tuple<int, string>> tempIProp = new List<Tuple<int, string>>();
-            foreach (string key in keyArray)
-            {
-                tempIProp.Add(iPropConfig.Where(x => x.Key == key).FirstOrDefault().Value);
-            }
-            return tempIProp;
-        }
+            PartName,
+            Description,
+            Material,
+            StockNumber,
+            Vendor,
+            Comments,
+            Version,
+        };
 
     }
-
-
 
 }
